@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #qrcode { margin-top: 20px; }
+        #result-text { margin-top: 10px; word-break: break-all; font-family: monospace; background: #f0f0f0; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>WiFi QR Code Generator</h1>
+    
+    <div class="form-group">
+        <label for="ssid">SSID (Network Name):</label>
+        <input type="text" id="ssid" placeholder="Enter WiFi Name">
+    </div>
+
+    <div class="form-group">
+        <label for="encryption">Encryption Type:</label>
+        <select id="encryption">
+            <option value="WPA">WPA/WPA2</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">None</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="text" id="password" placeholder="Enter WiFi Password">
+    </div>
+
+    <div class="form-group">
+        <label>
+            <input type="checkbox" id="hidden" style="width: auto;"> Hidden Network
+        </label>
+    </div>
+
+    <button onclick="generateQR()">Generate QR Code</button>
+
+    <div id="result-text"></div>
+    <div id="qrcode"></div>
+
+    <script>
+        var qrcode = new QRCode(document.getElementById("qrcode"), {
+            width: 256,
+            height: 256
+        });
+
+        function generateQR() {
+            var ssid = document.getElementById("ssid").value;
+            var encryption = document.getElementById("encryption").value;
+            var password = document.getElementById("password").value;
+            var hidden = document.getElementById("hidden").checked;
+
+            if (!ssid) {
+                alert("Please enter SSID");
+                return;
+            }
+
+            // Standard WiFi QR format: WIFI:S:<SSID>;T:<Encryption>;P:<Password>;H:<Hidden>;;
+            // Characters like :, ;, \, " should be escaped with \
+            
+            function escape(str) {
+                return str.replace(/([\\;,:"])/g, '\\$1');
+            }
+
+            var qrString = "WIFI:S:" + escape(ssid) + ";";
+            
+            if (encryption !== 'nopass') {
+                qrString += "T:" + encryption + ";";
+            } else {
+                qrString += "T:nopass;"; 
+            }
+
+            if (password) {
+                qrString += "P:" + escape(password) + ";";
+            }
+            
+            if (hidden) {
+                qrString += "H:true;";
+            }
+
+            qrString += ";";
+
+            document.getElementById("result-text").textContent = "QR Content: " + qrString;
+            
+            qrcode.clear();
+            qrcode.makeCode(qrString);
+        }
+    </script>
+</body>
+</html>
